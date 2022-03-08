@@ -1,4 +1,13 @@
-import requests, os, codecs, json, gzip, bz2, collections, csv, sqlite3, re
+import requests
+import os
+import codecs
+import json
+import gzip
+import bz2
+import collections
+import csv
+import sqlite3
+import re
 
 
 city_list_url = 'http://bulk.openweathermap.org/sample/city.list.json.gz'
@@ -11,6 +20,7 @@ and then to divide the list into smaller chunks: each chunk is ordered by
 city ID and written to a separate file
 Source files are under: http://bulk.openweathermap.org/sample/
 """
+
 
 def download_the_files():
     print('Downloading file '+city_list_url+' ...')
@@ -32,20 +42,24 @@ def read_all_cities_into_dict():
         for city_dict in cities:
             if city_dict['id'] in all_cities:
                 print(
-                    'Warning: city ID %d was already processed! Data chunk is: %s' % (city_dict['id'],
-                    city_dict)
+                    'city ID %d was already processed! Data chunk is: %s' % (
+                        city_dict['id'],
+                        city_dict
+                        )
                     )
                 continue
             else:
                 country = city_dict['country']
-                if country == 'US':  # if it's a US city, then take the "state" field as country
+                if country == 'US':  # take the "state" field as country
                     if city_dict['state']:
                         country = city_dict['state']
                     print(city_dict, country)
-                all_cities[city_dict['id']] = dict(name=city_dict['name'],
-                                                   country=country,
-                                                   lon=city_dict['coord']['lon'],
-                                                   lat=city_dict['coord']['lat'])
+                all_cities[city_dict['id']] = dict(
+                    name=city_dict['name'],
+                    country=country,
+                    lon=city_dict['coord']['lon'],
+                    lat=city_dict['coord']['lat']
+                    )
 
     print('... done')
     return all_cities
@@ -62,7 +76,7 @@ def read_all_cities_into_lists():
     with gzip.open(city_list_gz, "rb", "utf-8") as i:
         cities = json.loads(i.read())
         for city_dict in cities:
-            # check for URLs in city details (see https://github.com/csparpa/pyowm/pull/389)
+            # check for URLs in city details
             for item in ('name', 'country', 'state'):
                 item_no_url = URL_REGEX.sub('', city_dict[item])
                 if city_dict[item] != item_no_url:
@@ -113,7 +127,7 @@ def city_to_string(city_id, city_dict):
 
 def split_keyset(cities_dict):
     print(
-        'Splitting keyset of %d city names into 4 subsets based on the initial letter:' % (len(cities_dict),)
+        'Splitting keyset of %d names into 4 subsets:' % (len(cities_dict),)
         )
     print('-> from "a" = ASCII 97  to "f" = ASCII 102')
     print('-> from "g" = ASCII 103 to "l" = ASCII 108')
@@ -125,15 +139,15 @@ def split_keyset(cities_dict):
         if not name:
             continue
         c = ord(name[0])
-        if c < 97: # not a letter
+        if c < 97:  # not a letter
             pass
         elif c in range(97, 103):  # from a to f
             ss[0].append(city_to_string(city_id, cities_dict[city_id]))
-        elif c in range(103, 109): # from g to l
+        elif c in range(103, 109):  # from g to l
             ss[1].append(city_to_string(city_id, cities_dict[city_id]))
-        elif c in range(109, 115): # from m to r
+        elif c in range(109, 115):  # from m to r
             ss[2].append(city_to_string(city_id, cities_dict[city_id]))
-        elif c in range (115, 123): # from s to z
+        elif c in range(115, 123):  # from s to z
             ss[3].append(city_to_string(city_id, cities_dict[city_id]))
         continue
     print('... done')
@@ -169,18 +183,26 @@ def bz2_csv_compress(plaintext_csv, target_bz2):
             writer = csv.writer(file)
             for row in source_rows:
                 writer.writerow(row)
-    print( '... done')
+    print('... done')
 
 
 def bz2_all(outdir):
-    bz2_csv_compress('%s%s097-102.txt' % (outdir, os.sep),
-                      '%s%s097-102.txt.bz2' % (outdir, os.sep))
-    bz2_csv_compress('%s%s103-108.txt' % (outdir, os.sep),
-                      '%s%s103-108.txt.bz2' % (outdir, os.sep))
-    bz2_csv_compress('%s%s109-114.txt' % (outdir, os.sep),
-                      '%s%s109-114.txt.bz2' % (outdir, os.sep))
-    bz2_csv_compress('%s%s115-122.txt' % (outdir, os.sep),
-                      '%s%s115-122.txt.bz2' % (outdir, os.sep))
+    bz2_csv_compress(
+        '%s%s097-102.txt' % (outdir, os.sep),
+        '%s%s097-102.txt.bz2' % (outdir, os.sep)
+    )
+    bz2_csv_compress(
+        '%s%s103-108.txt' % (outdir, os.sep),
+        '%s%s103-108.txt.bz2' % (outdir, os.sep)
+    )
+    bz2_csv_compress(
+        '%s%s109-114.txt' % (outdir, os.sep),
+        '%s%s109-114.txt.bz2' % (outdir, os.sep)
+    )
+    bz2_csv_compress(
+        '%s%s115-122.txt' % (outdir, os.sep),
+        '%s%s115-122.txt.bz2' % (outdir, os.sep)
+    )
 
 
 def generate_city_id_gz_files(target_path='.'):

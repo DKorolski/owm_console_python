@@ -2,33 +2,30 @@ import requests
 import sqlite3
 
 
-#translate degrees to directions
 def get_wind_direction(deg):
-    l = ['N ','NE',' E','SE','S ','SW',' W','NW']
-    for i in range(0,8):
+    rumb = ['N ', 'NE', ' E', 'SE', 'S ', 'SW', ' W', 'NW']
+    for i in range(0, 8):
         step = 45.
         min = i*step - 45/2.
         max = i*step + 45/2.
         if i == 0 and deg > 360-45/2.:
             deg = deg - 360
         if deg >= min and deg <= max:
-            res = l[i]
+            res = rumb[i]
             break
     return res
+
 
 # get city_id with given name
 def get_city_id(s_city_name, appid):
     try:
         res = requests.get(
-            "http://api.openweathermap.org/data/2.5/find",
-                     params={
-                         'q': s_city_name,
-                         'type': 'like',
-                         'units': 'metric',
-                         'lang': 'ru',
-                         'APPID': appid
-                         }
-                     )
+            "http://api.openweathermap.org/data/2.5/find", params={
+                    'q': s_city_name,
+                    'type': 'like',
+                    'units': 'metric',
+                    'lang': 'ru',
+                    'APPID': appid})
         data = res.json()
         cities = ["{} ({})".format(d['name'], d['sys']['country'])
                   for d in data['list']]
@@ -46,8 +43,7 @@ def get_city_id(s_city_name, appid):
 def request_forecast(city_id, appid):
     try:
         res = requests.get(
-            "http://api.openweathermap.org/data/2.5/forecast",
-                           params={
+            "http://api.openweathermap.org/data/2.5/forecast", params={
                                'id': city_id,
                                'units': 'metric',
                                'lang': 'ru',
@@ -57,12 +53,15 @@ def request_forecast(city_id, appid):
         data = res.json()
         print('city:', data['city']['name'], data['city']['country'])
         for i in data['list']:
-            print( (i['dt_txt'])[:16], '{0:+3.0f}'.format(i['main']['temp']),
-                   '{0:2.0f}'.format(i['wind']['speed']) + " м/с",
-                   get_wind_direction(i['wind']['deg']),
-                   str(i['main']['humidity'])+ " %",
-                   i['weather'][0]['description']
-                    )
+            print((
+                i['dt_txt'])[:16],
+                '{0:+3.0f}'.format(i['main']['temp']),
+                '{0:2.0f}'.format(
+                i['wind']['speed']
+                ) + " м/с",
+                get_wind_direction(i['wind']['deg']),
+                str(i['main']['humidity']) + " %",
+                i['weather'][0]['description'])
     except Exception as e:
         print("Exception (forecast):", e)
         pass
@@ -72,8 +71,7 @@ def request_forecast(city_id, appid):
 def request_forecast_json(city_id, appid):
     try:
         res = requests.get(
-            "http://api.openweathermap.org/data/2.5/forecast",
-                           params={
+            "http://api.openweathermap.org/data/2.5/forecast", params={
                                'id': city_id,
                                'units': 'metric',
                                'lang': 'ru',
@@ -87,12 +85,11 @@ def request_forecast_json(city_id, appid):
     return data
 
 
-#upload to table forecasts
 def console_request(appid, path, query_city_id):
+    """upload to table forecasts"""
     try:
         res = requests.get(
-            "http://api.openweathermap.org/data/2.5/forecast",
-                           params={
+            "http://api.openweathermap.org/data/2.5/forecast", params={
                                'id': query_city_id,
                                'units': 'metric',
                                'lang': 'ru',
@@ -100,14 +97,14 @@ def console_request(appid, path, query_city_id):
                                }
                            )
         data = res.json()
-        weather_lists=data['list']
+        weather_lists = data['list']
         connection = sqlite3.connect(path)
         cursor = connection.cursor()
         city_sk = cursor.execute(
             'SELECT city_sk FROM city WHERE owm_city_id='+str(query_city_id)
             ).fetchone()[0]
         forecasts = [[] for _ in range(len(weather_lists))]
-        n=0
+        n = 0
         for i in weather_lists:
             forecasts[n] = (
                 [
@@ -121,8 +118,7 @@ def console_request(appid, path, query_city_id):
                     i['weather'][0]['description']
                     ]
                 )
-            n+=1
+            n += 1
     except Exception as e:
         print("Exception (forecast):", e)
     return forecasts
-    

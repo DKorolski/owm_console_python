@@ -1,0 +1,7 @@
+npyscreen
+sqlite3
+requests
+codecs
+gzip
+collections
+re
