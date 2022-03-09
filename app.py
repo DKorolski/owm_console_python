@@ -48,11 +48,11 @@ last_record = cursor.execute(
 download_the_files()
 all_cities = read_all_cities_into_lists()
 cities = all_cities[0:volume_to_download]
-print('owm source amount of cities records :', len(cities))
+print('Test set of owm contains number of records :', len(cities))
 try:
-    print('last city record: ', last_record[0])
+    print('DB last city record: ', last_record[0])
 except Exception as exception:
-    print('database is empty', exception)
+    print('Database is not yet populated (empty). Exception: ', exception)
 if last_record == 0 or last_record is None:
     print('Will populate SQLite DB to table city: %s' % (DB_NAME)+'.city')
     print('Job started')
@@ -69,7 +69,19 @@ counter = 0
 for city in cities:
     query_city_id = city[0]
     stored_forecasts = cursor.execute(
-        "SELECT max(case when (substr(dt_txt,0,11) = date('now')) then 1 else 0 end) FROM forecast  WHERE owm_city_id="+str(query_city_id)
+        """
+        SELECT
+            max(case when
+                    (substr(dt_txt,0,11) = date('now'))
+                then
+                    1
+                else
+                    0
+                end)
+        FROM
+            forecast
+        WHERE
+            owm_city_id="""+str(query_city_id)
         ).fetchone()[0]
     if stored_forecasts == 1:
         print('Forecasts for given sample and date has already stored')

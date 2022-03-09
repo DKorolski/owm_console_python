@@ -7,7 +7,6 @@ def upload_db(path, data, query_city_id):
     process data manipulation (dml)
     """
     weather_lists = data['list']
-    city_list = data['city']
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
     city_sk = cursor.execute(
@@ -55,6 +54,4 @@ def upload_db(path, data, query_city_id):
         )
     connection.commit()
     connection.close()
-    #print('Succeful inserted new forecasts for city: ' + city_list['name'])
-    #print('Affected count or rows:'+str(n))
     return n

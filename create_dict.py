@@ -66,7 +66,7 @@ def read_all_cities_into_dict():
 
 
 URL_REGEX = re.compile(
-    """(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"""
+    """(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"""  # noqa
     )
 
 
@@ -222,7 +222,11 @@ def populate_db_sqlite(db_path, cities_list):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.executemany(
-        'INSERT INTO city (owm_city_id, name, country, state, lat, lon) VALUES (?, ?, ?, ?, ?, ?)',
+        """
+            INSERT INTO
+                city (owm_city_id, name, country, state, lat, lon)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """,
         cities_list
         )
     conn.commit()
