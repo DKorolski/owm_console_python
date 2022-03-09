@@ -55,7 +55,6 @@ def upload_db(path, data, query_city_id):
         )
     connection.commit()
     connection.close()
-    print('Succeful inserted new forecasts for city: ' + city_list['name'])
-    print('Affected count or rows:'+str(n))
-    print("End processing rows")
+    #print('Succeful inserted new forecasts for city: ' + city_list['name'])
+    #print('Affected count or rows:'+str(n))
     return n

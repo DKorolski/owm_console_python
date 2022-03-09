@@ -19,19 +19,16 @@ pip install -r requirements.txt
 pytest
 ```
 
-## 4. Execute console_app.py
+## 4. Execute app.py
 
 ``` 
 test api connection
 first run:
 creates empty database file SQLite3
-creates dictionary from external source
+creates dictionary from external source for given set of cities (default - 10 cities from 200000)
 on start:
 check for update dictionary
-user dialogue:
-prompts user to input city name to get forecast
-returns to user city info from database
-returns to user forecast brief message
+retrieves forecast for sample set of cities
 updates forecasts table if necessary (new dates)
 
 ```
